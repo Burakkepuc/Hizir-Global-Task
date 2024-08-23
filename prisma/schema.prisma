@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ProductVariant {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  sku        String
+  slug       String
+  stock      Int
+  price      Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+ product    Products  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantAttributes VariantAttribute[]
+
+}
+
+
+model Products {
+  id         Int              @id @default(autoincrement())
+  name       String
+  created_at DateTime         @default(now())
+  updated_at DateTime         @updatedAt
+  variants   ProductVariant[]
+}
+
+model Attributes {
+  id              Int               @id @default(autoincrement())
+  name            String
+  created_at DateTime         @default(now())
+  updated_at DateTime         @updatedAt
+  
+  attributeValues AttributeValues[]
+
+
+  VariantAttribute VariantAttribute[]
+}
+
+model AttributeValues {
+  id               Int                @id @default(autoincrement())
+  attribute_id     Int
+  name             String
+  attribute        Attributes         @relation(fields: [attribute_id], references: [id], onDelete: Cascade)
+  created_at DateTime         @default(now())
+  updated_at DateTime         @updatedAt
+  
+  VariantAttribute VariantAttribute[]
+  @@unique([attribute_id, name])
+}
+
+model VariantAttribute {
+  id               Int                @id @default(autoincrement())
+  attribute_value_id Int
+  attribute_id       Int
+  product_variant_id Int
+  
+  created_at DateTime         @default(now())
+  updated_at DateTime         @updatedAt
+  
+  attribute Attributes @relation(fields: [attribute_id],references: [id],onDelete: Cascade)
+  attributeValue      AttributeValues  @relation(fields: [attribute_value_id], references: [id], onDelete: Cascade)
+  productVariant      ProductVariant   @relation(fields: [product_variant_id], references: [id], onDelete: Cascade)
+}
+
