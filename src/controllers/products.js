@@ -1,19 +1,17 @@
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
+const rabbitMQ = require('../config/rabbitmq')
 
 
 const createProduct = async (req, res, next) => {
   try {
     const { product_name } = req.body;
 
-    const createProduct = await prisma.products.create({
-      data: {
-        name: product_name
-      }
+    await rabbitMQ.publishToQueue('product_queue', {
+      product_name,
+      timestamp: new Date(),
     })
-
-
-    res.json({ success: true, data: createProduct });
+    res.json({ success: true, message: "Product creation request received and processed in queue" });
 
   } catch (error) {
     next({ statusCode: 500, message: error.message });

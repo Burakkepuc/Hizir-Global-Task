@@ -1,6 +1,8 @@
 const express = require('express');
 const notFound = require('./middlewares/notFound');
 const errorHandler = require('./middlewares/error');
+
+const rabbitMQ = require('./config/rabbitmq')
 const port = 3000
 
 const app = express()
@@ -21,6 +23,9 @@ app.use(notFound)
 
 //Error handler
 app.use(errorHandler)
+
+//Consume queue
+rabbitMQ.consumeFromQueue('product_queue');
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
