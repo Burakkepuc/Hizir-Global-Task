@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 const rabbitMQ = require('../config/rabbitmq')
+const redisClient = require('../config/redis')
 
 
 const createProduct = async (req, res, next) => {
@@ -63,7 +64,7 @@ const createVariants = async (req, res, next) => {
       return createdVariant;
     }));
 
-    res.status(201).json({ success: true, data: createdVariants });
+    return res.status(201).json({ success: true, data: createdVariants });
 
   } catch (error) {
     next({ statusCode: 500, message: error.message });
@@ -71,22 +72,11 @@ const createVariants = async (req, res, next) => {
 };
 const getAllProducts = async (req, res, next) => {
   try {
-    // const products = await prisma.productVariant.findMany({
-    //   select: {
-    //     id: true,
-    //     productId: true,
-    //     sku: true,
-    //     slug: true,
-    //     stock: true,
-    //     price: true,
-    //     product: {
-    //       select: {
-    //         id: true,
-    //         name: true,
-    //       }
-    //     }
-    //   }
-    // });
+    const cacheKey = "all_product_variant_attributes"
+    const cachedData = await redisClient.getCache(cacheKey);
+    if (cachedData) {
+      return res.status(200).json({ type: true, data: cachedData, message: 'Product variants fetched from cache' });
+    }
 
     const variantAttributes = await prisma.variantAttribute.findMany({
       include: {
@@ -100,12 +90,12 @@ const getAllProducts = async (req, res, next) => {
       }
     });
 
+    await redisClient.setCache(cacheKey, variantAttributes, 7200)
 
 
 
 
-
-    res.status(200).json({ success: true, data: variantAttributes });
+    return res.status(200).json({ success: true, data: variantAttributes });
 
   } catch (error) {
     next({ statusCode: 500, message: error.message });
