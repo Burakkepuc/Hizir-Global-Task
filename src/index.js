@@ -26,6 +26,7 @@ app.use(errorHandler)
 
 //Consume queue
 rabbitMQ.consumeFromQueue('product_queue');
+rabbitMQ.consumeFromVariantQueue('variant_queue');
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

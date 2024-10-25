@@ -33,43 +33,54 @@ const createVariants = async (req, res, next) => {
 
     const variants = req.body;
 
-    const createdVariants = await Promise.all(variants.map(async variant => {
-      const { sku, slug, stock, price, attributes } = variant;
+    // const createdVariants = await Promise.all(variants.map(async variant => {
+    //   const { sku, slug, stock, price, attributes } = variant;
 
-      const createdVariant = await prisma.productVariant.create({
-        data: {
-          productId: parseInt(productId),
-          sku,
-          slug,
-          stock,
-          price
-        }
-      });
-
-
-      await Promise.all(
-        attributes.map(async attribute => {
-          const { attribute_id, attribute_value_id } = attribute;
-          await prisma.variantAttribute.create({
-            data: {
-              attribute_id,
-              attribute_value_id,
-              product_variant_id: createdVariant.id,
-            },
-          });
-        })
-      );
+    //   const createdVariant = await prisma.productVariant.create({
+    //     data: {
+    //       productId: parseInt(productId),
+    //       sku,
+    //       slug,
+    //       stock,
+    //       price
+    //     }
+    //   });
 
 
-      return createdVariant;
-    }));
+    //   await Promise.all(
+    //     attributes.map(async attribute => {
+    //       const { attribute_id, attribute_value_id } = attribute;
+    //       await prisma.variantAttribute.create({
+    //         data: {
+    //           attribute_id,
+    //           attribute_value_id,
+    //           product_variant_id: createdVariant.id,
+    //         },
+    //       });
+    //     })
+    //   );
 
-    return res.status(201).json({ success: true, data: createdVariants });
+
+    //   return createdVariant;
+    // }));
+
+
+    await rabbitMQ.publishToQueue('variant_queue', {
+      productId,
+      variants,
+      timestamp: new Date(),
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Variant creation request received and processed in queue"
+    });
 
   } catch (error) {
     next({ statusCode: 500, message: error.message });
   }
 };
+
 const getAllProducts = async (req, res, next) => {
   try {
     const cacheKey = "all_product_variant_attributes"
