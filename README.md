@@ -6,6 +6,7 @@ Bu proje, Hızır Global AŞ için bir ürün ve ürün varyantları yönetim si
 
 ```
 |—— .env
+|—— .env_sample
 |—— .gitignore
 |—— db_architecture
 |    |—— ER_DIAGRAM.PNG
@@ -16,6 +17,9 @@ Bu proje, Hızır Global AŞ için bir ürün ve ürün varyantları yönetim si
 |    |—— schema.prisma
 |    |—— seed.js
 |—— src
+|    |—— config
+|        |—— rabbitmq.js
+|        |—— redis.js
 |    |—— controllers
 |        |—— products.js
 |    |—— index.js
@@ -26,9 +30,15 @@ Bu proje, Hızır Global AŞ için bir ürün ve ürün varyantları yönetim si
 |    |—— routes
 |        |—— index.js
 |        |—— products.js
+|    |—— services
+|        |—— products.js
 |    |—— utils
+|        |—— generalHelpers.js
+|    |—— validations
+|        |—— products.js
 |—— __test__
 |    |—— products.test.js
+
 ```
 
 ## Kurulum

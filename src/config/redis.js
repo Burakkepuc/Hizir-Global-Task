@@ -43,6 +43,11 @@ class RedisClient {
     }
   }
 
+  async delCache(key) {
+    await this.client.del(key);
+  }
+
+
   async disconnect() {
     try {
       await this.client.disconnect();

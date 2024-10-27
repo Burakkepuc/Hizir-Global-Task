@@ -13,7 +13,7 @@ class RabbitMQ {
     try {
       if (!this.queueConnected) {
 
-        const connection = await amqp.connect("amqp://localhost:5672");
+        const connection = await amqp.connect(process.env.AMPQP_CONNECT);
         this.channel = await connection.createChannel();
 
         this.queueConnected = true;
